@@ -87,11 +87,11 @@ const resolvers = {
 
 
       // Make it so a logged in user can only remove a book from their own profile
-    removeBook: async (parent, { bookStuff }, context) => {
+    removeBook: async (parent, { book }, context) => {
           if (context.user) {
             return User.findOneAndUpdate(
               { _id: context.user._id },
-              { $pull: { books: bookStuff } },
+              { $pull: { books: book } },
               { new: true }
             );
           }

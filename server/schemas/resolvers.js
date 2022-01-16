@@ -32,7 +32,7 @@ const resolvers = {
   },
 
   Mutation: {
-    addUser: async (parent, { username, email, password }) => {
+    createUser: async (parent, { username, email, password }) => {
       // First we create the user
       const user = await User.create({ username, email, password });
       // To reduce friction for the user, we immediately sign a JSON Web Token and log the user in after they are created
@@ -63,13 +63,13 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    addBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
+    saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
       const book = await Book.create({ authors, description, bookId, image, link, title });
 
       if(context.user){
-      await User.findOneAndUpdate(
+      return User.findOneAndUpdate(
         { _id: context.user._id },
-        { $addToSet: { books: book } },
+        { $addToSet: { savedBooks: book } },
         {
           new: true,
           runValidators: true,
@@ -78,7 +78,7 @@ const resolvers = {
       }
     },
        // Set up mutation so a logged in user can only remove their profile and no one else's
-    removeUser: async (parent, args, context) => {
+    deleteUser: async (parent, args, context) => {
       if (context.user) {
         return User.findOneAndDelete({ _id: context.user._id });
         }
@@ -87,11 +87,11 @@ const resolvers = {
 
 
       // Make it so a logged in user can only remove a book from their own profile
-    removeBook: async (parent, { book }, context) => {
+    deleteBook: async (parent, { params }, context) => {
           if (context.user) {
             return User.findOneAndUpdate(
               { _id: context.user._id },
-              { $pull: { books: book } },
+              { $pull: { savedBooks: { bookId: params.bookId } } },
               { new: true }
             );
           }

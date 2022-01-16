@@ -4,19 +4,31 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    users: async () => {
-      return User.find().populate('books');
+    // users: async () => {
+    //   return User.find().populate('books');
+    // },
+    // user: async (parent, { userID }) => {
+    //   return User.findOne({ userID }).populate('books');
+    // },
+    // books: async (parent, { username }) => {
+    //   const params = username ? { username } : {};
+    //   return Book.find(params).sort({ createdAt: -1 });
+    // },
+    // book: async (parent, { bookId }) => {
+    //   return Book.findOne({ _id: bookId });
+    // },
+        // By adding context to our query, we can retrieve the logged in user without specifically searching for them
+    me: async (parent, args, context) => {
+      if (context.user) {
+        return User.findOne({ _id: context.user._id });
+      }
+      throw new AuthenticationError('You need to be logged in!');
     },
-    user: async (parent, { username }) => {
-      return User.findOne({ username }).populate('books');
-    },
-    books: async (parent, { username }) => {
-      const params = username ? { username } : {};
-      return Book.find(params).sort({ createdAt: -1 });
-    },
-    book: async (parent, { bookId }) => {
-      return Book.findOne({ _id: bookId });
-    },
+
+
+
+
+
   },
 
   Mutation: {
@@ -51,40 +63,42 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    addBook: async (parent, {userId, authors, description, bookId, image, link, title }, context) => {
+    addBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
       const book = await Book.create({ authors, description, bookId, image, link, title });
 
       if(context.user){
       await User.findOneAndUpdate(
-        { _id: userId },
-        { $addToSet: { books: book._id } }
-      );
-
-      return book;
-    }}
-    addComment: async (parent, { thoughtId, commentText, commentAuthor }) => {
-      return Thought.findOneAndUpdate(
-        { _id: thoughtId },
-        {
-          $addToSet: { comments: { commentText, commentAuthor } },
-        },
+        { _id: context.user._id },
+        { $addToSet: { books: book } },
         {
           new: true,
           runValidators: true,
         }
-      );
+      )
+      }
     },
-    removeThought: async (parent, { thoughtId }) => {
-      return Thought.findOneAndDelete({ _id: thoughtId });
-    },
-    removeComment: async (parent, { thoughtId, commentId }) => {
-      return Thought.findOneAndUpdate(
-        { _id: thoughtId },
-        { $pull: { comments: { _id: commentId } } },
-        { new: true }
-      );
-    },
-  },
-};
+       // Set up mutation so a logged in user can only remove their profile and no one else's
+    removeUser: async (parent, args, context) => {
+      if (context.user) {
+        return User.findOneAndDelete({ _id: context.user._id });
+        }
+          throw new AuthenticationError('You need to be logged in!');
+        },
+
+
+      // Make it so a logged in user can only remove a book from their own profile
+    removeBook: async (parent, { bookStuff }, context) => {
+          if (context.user) {
+            return User.findOneAndUpdate(
+              { _id: context.user._id },
+              { $pull: { books: bookStuff } },
+              { new: true }
+            );
+          }
+          throw new AuthenticationError('You need to be logged in!');
+        },
+      }
+    };
+    
 
 module.exports = resolvers;

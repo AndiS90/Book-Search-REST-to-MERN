@@ -25,6 +25,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 
+// serve up react front-end in production
+router.use((req, res) => {
+  res.sendFile(path.join(__dirname, '../../client/build/index.html'));
+});
 
 // app.use(routes);
 

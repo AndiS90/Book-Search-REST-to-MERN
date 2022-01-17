@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
 import { useMutation } from "@apollo/react-hooks";
-import { LOGIN } from "../utils/mutations";
+import { LOGIN_USER } from "../utils/mutations";
 
 // import { loginUser } from '../utils/API';
 import Auth from '../utils/auth';
@@ -13,7 +13,7 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
-  const [login, { err }] = useMutation(LOGIN);
+  const [login, { err, data }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -22,6 +22,7 @@ const LoginForm = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+    console.log(userFormData)
 
     // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
@@ -31,17 +32,13 @@ const LoginForm = () => {
     }
 
     try {
-      const { response } = await login({
+      const { data } = await login({
         variables: { ...userFormData },
       });
 
-      if (err) {
-        throw new Error('something went wrong!');
-      }
-
       // const { token, user } = await response.json();
       // console.log(user);
-      Auth.login(response.login.token);
+      Auth.login(data.login.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);

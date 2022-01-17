@@ -9,13 +9,34 @@ import { useQuery, useMutation } from '@apollo/react-hooks';
 import { QUERY_ME } from '../utils/queries';
 import { DELETE_BOOK } from '../utils/mutations';
 
-const SavedBooks = () => {
+const SavedBooks = ({ books, isLoggedInUser = false}) => {
   // const [userData, setUserData] = useState({});
 
-  const [deleteBook, { error }] = useMutation(DELETE_BOOK);
+  const [deleteBook, { error }] = useMutation(DELETE_BOOK, {
+    update(cache, { data: { deleteBook } }) {
+      try {
+        cache.writeQuery({
+          query: QUERY_ME,
+          data: { me: deleteBook },
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  });
 
-  const { loading, response } = useQuery(QUERY_ME);
-  const userData = response?.me || {};
+
+  const { loading, data } = useQuery(QUERY_ME
+    // {
+    //   variables: { userId: userId },
+    // }
+    );
+  const userData = data?.me || {};
+
+  //  // Use React Router's `<Redirect />` component to redirect to personal profile page if username is yours
+  //  if (Auth.loggedIn() && Auth.getProfile().data._id === profileId) {
+  //   return <Redirect to="/me" />;
+  // }
 
   // use this to determine if `useEffect()` hook needs to run again
   // const userDataLength = Object.keys(userData).length;
@@ -54,13 +75,13 @@ const SavedBooks = () => {
     }
 
     try {
-      const { response }= await deleteBook({
+      const { data }= await deleteBook({
         variables: { bookId }
       });
 
-      // if (err) {
-      //   throw new Error('something went wrong!');
-      // }
+      if (error) {
+        throw new Error('something went wrong!');
+      }
 
       // const updatedUser = await response.json();
       // setUserData(updatedUser);
@@ -71,6 +92,8 @@ const SavedBooks = () => {
       console.error(err);
     }
   };
+
+
 
   // if data isn't here yet, say so
   if (loading) {

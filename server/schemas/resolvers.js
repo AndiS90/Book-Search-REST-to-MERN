@@ -20,7 +20,7 @@ const resolvers = {
         // By adding context to our query, we can retrieve the logged in user without specifically searching for them
     me: async (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id });
+        return User.findOne({ _id: context.user._id }).populate('books');
       }
       throw new AuthenticationError('You need to be logged in!');
     },
@@ -64,9 +64,11 @@ const resolvers = {
       return { token, user };
     },
     saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
-      const book = await Book.create({ authors, description, bookId, image, link, title });
+      if(context.user){ 
+        
+        const book = await Book.create({ authors, description, bookId, image, link, title });
 
-      if(context.user){
+     
       return User.findOneAndUpdate(
         { _id: context.user._id },
         { $addToSet: { savedBooks: book } },
@@ -77,21 +79,26 @@ const resolvers = {
       )
       }
     },
-       // Set up mutation so a logged in user can only remove their profile and no one else's
-    deleteUser: async (parent, args, context) => {
-      if (context.user) {
-        return User.findOneAndDelete({ _id: context.user._id });
-        }
-          throw new AuthenticationError('You need to be logged in!');
-        },
+    //    // Set up mutation so a logged in user can only remove their profile and no one else's
+    // deleteUser: async (parent, args, context) => {
+    //   if (context.user) {
+    //     return User.findOneAndDelete({ _id: context.user._id });
+    //     }
+    //       throw new AuthenticationError('You need to be logged in!');
+    //     },
 
 
       // Make it so a logged in user can only remove a book from their own profile
     deleteBook: async (parent, { params }, context) => {
           if (context.user) {
+
+              const book = await Book.findOneAndDelete({
+                _id: params,
+              });
+
             return User.findOneAndUpdate(
               { _id: context.user._id },
-              { $pull: { savedBooks: { bookId: params.bookId } } },
+              { $pull: { savedBooks: book._id } },
               { new: true }
             );
           }

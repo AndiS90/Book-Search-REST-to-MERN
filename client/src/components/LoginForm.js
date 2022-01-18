@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation } from '@apollo/client';
 import { LOGIN_USER } from "../utils/mutations";
 
 // import { loginUser } from '../utils/API';
@@ -13,16 +13,18 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
-  const [login, { err, data }] = useMutation(LOGIN_USER);
+  const [login, { error, data }] = useMutation(LOGIN_USER);
 
+    // update state based on form input changes
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
   };
 
+   // submit form
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    console.log(userFormData)
+    // console.log(userFormData)
 
     // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
@@ -44,6 +46,7 @@ const LoginForm = () => {
       setShowAlert(true);
     }
 
+  // clear form values
     setUserFormData({
       username: '',
       email: '',

@@ -24,7 +24,13 @@ const resolvers = {
       }
       throw new AuthenticationError('You need to be logged in!');
     },
-
+    books: async (parent, { username }) => {
+      const params = username ? { username } : {};
+      return Book.find(params).sort({ createdAt: -1 });
+    },
+    // book: async (parent, { bookId }) => {
+    //   return Book.findOne({ _id: bookId });
+    // },
 
 
 
@@ -63,15 +69,15 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
-      if(context.user){ 
+    saveBook: async (parent, { user,  body }, context) => {
+      if(context.user.id === user.id){ 
         
-        const book = await Book.create({ authors, description, bookId, image, link, title });
+        // const book = await Book.create({ authors, description, bookId, image, link, title });
 
      
-      return User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { _id: context.user._id },
-        { $addToSet: { savedBooks: book } },
+        { $addToSet: { savedBooks: body } },
         {
           new: true,
           runValidators: true,
@@ -89,16 +95,12 @@ const resolvers = {
 
 
       // Make it so a logged in user can only remove a book from their own profile
-    deleteBook: async (parent, { params }, context) => {
+    deleteBook: async (parent, { book }, context) => {
           if (context.user) {
-
-              const book = await Book.findOneAndDelete({
-                _id: params,
-              });
 
             return User.findOneAndUpdate(
               { _id: context.user._id },
-              { $pull: { savedBooks: book._id } },
+              { $pull: { savedBooks: book } },
               { new: true }
             );
           }

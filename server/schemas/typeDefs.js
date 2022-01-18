@@ -29,18 +29,13 @@ const typeDefs = gql`
   type Query {
     # Because we have the context functionality in place to check a JWT and decode its data, we can use a query that will always find and return the logged in user's data
     me: User
+    books: Book
   }
 
   type Mutation {
     createUser(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
-    deleteUser(): User
-    saveBook(authors: [String]!
-      description: String!
-      bookId: String!
-      image: String!
-      link: String!
-      title: String!): User
+    saveBook(authors: [String]!, description: String!, bookId: String!, image: String!, link: String!, title: String!): User
     deleteBook(_id: ID!): User
   }
 `;

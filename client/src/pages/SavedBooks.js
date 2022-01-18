@@ -5,13 +5,16 @@ import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { Redirect, useParams } from 'react-router-dom';
+
+import { useQuery, useMutation } from '@apollo/client';
 import { QUERY_ME } from '../utils/queries';
 import { DELETE_BOOK } from '../utils/mutations';
 
-const SavedBooks = ({ books, isLoggedInUser = false}) => {
+const SavedBooks = () => {
   // const [userData, setUserData] = useState({});
 
+  
   const [deleteBook, { error }] = useMutation(DELETE_BOOK, {
     update(cache, { data: { deleteBook } }) {
       try {
@@ -26,19 +29,46 @@ const SavedBooks = ({ books, isLoggedInUser = false}) => {
   });
 
 
-  const { loading, data } = useQuery(QUERY_ME
-    // {
-    //   variables: { userId: userId },
-    // }
-    );
+  const { username: userParam } = useParams();
+
+  const { loading, data } = useQuery(QUERY_ME, {
+    variables: { username: userParam },
+  });
+
   const userData = data?.me || {};
+  // redirect to personal profile page if username is yours
+  if (Auth.loggedIn() && Auth.getProfile().data.username === userParam) {
+    return <Redirect to="/saved" />;
+  }
+
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
+
+  if (!userData?.username) {
+    return (
+      <h4>
+        You need to be logged in to see this. Use the navigation links above to
+        sign up or log in!
+      </h4>
+    );
+  }
+
+
+
+
+
+
+
+
+
 
   //  // Use React Router's `<Redirect />` component to redirect to personal profile page if username is yours
   //  if (Auth.loggedIn() && Auth.getProfile().data._id === profileId) {
   //   return <Redirect to="/me" />;
   // }
 
-  // use this to determine if `useEffect()` hook needs to run again
+ // use this to determine if `useEffect()` hook needs to run again
   // const userDataLength = Object.keys(userData).length;
 
   // useEffect(() => {
@@ -68,6 +98,11 @@ const SavedBooks = ({ books, isLoggedInUser = false}) => {
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
+
+
+
+
+
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
     if (!token) {

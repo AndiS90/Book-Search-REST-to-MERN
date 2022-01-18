@@ -18,17 +18,17 @@ const SearchBooks = () => {
 
      cache.writeQuery({
        query: QUERY_BOOKS,
-       data: { savedBooks: [saveBook, ...books] },
+       data: { books: [saveBook, ...books] },
      });
-   } catch (e) {
-     console.error(e);
+   } catch (error) {
+     console.error(error);
    }
 
    // update me object's cache
    const { me } = cache.readQuery({ query: QUERY_ME });
    cache.writeQuery({
      query: QUERY_ME,
-     data: { me: { ...me, savedBooks: [...me.savedBooks, saveBook] } },
+     data: { me: { ...me, books: [...me.books, saveBook] } },
    });
  },
 });
@@ -76,6 +76,7 @@ const SearchBooks = () => {
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
+        link: book.selfLink
       }));
 
       setSearchedBooks(bookData);
@@ -89,6 +90,7 @@ const SearchBooks = () => {
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    console.log(bookToSave);
 
 
 

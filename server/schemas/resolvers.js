@@ -69,15 +69,15 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    saveBook: async (parent, { user,  body }, context) => {
-      if(context.user.id === user.id){ 
+    saveBook: async (parent, { authors, description, bookId, image, title, link }, context) => {
+      if(context.user.id ){ 
         
-        // const book = await Book.create({ authors, description, bookId, image, link, title });
+        const book = await Book.create({ authors, description, bookId, image, title, link });
 
      
-      await User.findOneAndUpdate(
+     const updatedUser = await User.findOneAndUpdate(
         { _id: context.user._id },
-        { $addToSet: { savedBooks: body } },
+        { $addToSet: { books: book._id } },
         {
           new: true,
           runValidators: true,

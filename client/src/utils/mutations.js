@@ -9,7 +9,7 @@ export const CREATE_USER = gql`
        username
        email
        bookCount
-       savedBooks{
+       books{
            authors
            description
            title
@@ -31,7 +31,7 @@ export const LOGIN_USER = gql`
         username
         email
         bookCount
-        savedBooks {
+        books {
             authors
             description
             title
@@ -46,7 +46,7 @@ export const LOGIN_USER = gql`
 
 export const SAVE_BOOK = gql`
   mutation saveBook( $authors: [String]!, $description: String!, $bookId: String!, $image: String!, $title: String!, $link: String!) {
-    saveBook( authors: $authors, description: $description, bookId: $bookID, image: $image,title: $title, link: $link ) {
+    saveBook( authors: $authors, description: $description, bookId: $bookId, image: $image,title: $title, link: $link ) {
         _id
         authors
         description       

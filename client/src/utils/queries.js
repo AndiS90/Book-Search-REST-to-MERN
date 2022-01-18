@@ -7,7 +7,7 @@ export const QUERY_ME = gql`
       username
       email
       bookCount
-      savedBooks {
+      books {
           authors
           description
           bookId

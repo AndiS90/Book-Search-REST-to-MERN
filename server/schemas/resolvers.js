@@ -1,5 +1,5 @@
 const { AuthenticationError } = require('apollo-server-express');
-const { User, Book } = require('../models');
+const { User } = require('../models');
 const { signToken } = require('../utils/auth');
 
 const resolvers = {
@@ -20,14 +20,15 @@ const resolvers = {
         // By adding context to our query, we can retrieve the logged in user without specifically searching for them
     me: async (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id }).populate('books');
+        const userData = await User.findOne({ _id: context.user._id }).select('-__v -password');  // version key in regards to mongoose properties
+        return userData;
       }
       throw new AuthenticationError('You need to be logged in!');
     },
-    books: async (parent, { username }) => {
-      const params = username ? { username } : {};
-      return Book.find(params).sort({ createdAt: -1 });
-    },
+    // books: async (parent, { username }) => {
+    //   const params = username ? { username } : {};
+    //   return Book.find(params).sort({ createdAt: -1 });
+    // },
     // book: async (parent, { bookId }) => {
     //   return Book.findOne({ _id: bookId });
     // },
@@ -69,20 +70,21 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    saveBook: async (parent, { authors, description, bookId, image, title, link }, context) => {
-      if(context.user.id ){ 
-        
-        const book = await Book.create({ authors, description, bookId, image, title, link });
-
+    saveBook: async (parent, { bookInput } , context) => {
+      if(context.user ){        
+        // const book = await Book.create({ input });
      
-     const updatedUser = await User.findOneAndUpdate(
+  const updatedUser = await User.findOneAndUpdate(
         { _id: context.user._id },
-        { $addToSet: { books: book._id } },
+        { $addToSet: { savedBooks: { bookInput } } },
         {
           new: true,
-          runValidators: true,
+          runValidation: true,
         }
-      )
+      );
+
+      return updatedUser;
+      
       }
     },
     //    // Set up mutation so a logged in user can only remove their profile and no one else's

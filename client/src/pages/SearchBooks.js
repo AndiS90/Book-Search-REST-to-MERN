@@ -6,32 +6,32 @@ import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import { useMutation } from '@apollo/client';
 import { SAVE_BOOK, } from "../utils/mutations";
-import { QUERY_ME, QUERY_BOOKS } from '../utils/queries';
+// import { QUERY_ME, QUERY_BOOKS } from '../utils/queries';
  
 const SearchBooks = () => {
 
 
-  const [saveBook, { error }] = useMutation(SAVE_BOOK, {   
-    update(cache, { data: { saveBook } }) {
-   try {
-     const { books } = cache.readQuery({ query: QUERY_BOOKS });
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);  
+//     update(cache, { data: { saveBook } }) {
+//    try {
+//      const { books } = cache.readQuery({ query: QUERY_BOOKS });
 
-     cache.writeQuery({
-       query: QUERY_BOOKS,
-       data: { books: [saveBook, ...books] },
-     });
-   } catch (error) {
-     console.error(error);
-   }
+//      cache.writeQuery({
+//        query: QUERY_BOOKS,
+//        data: { books: [saveBook, ...books] },
+//      });
+//    } catch (error) {
+//      console.error(error);
+//    }
 
-   // update me object's cache
-   const { me } = cache.readQuery({ query: QUERY_ME });
-   cache.writeQuery({
-     query: QUERY_ME,
-     data: { me: { ...me, books: [...me.books, saveBook] } },
-   });
- },
-});
+//    // update me object's cache
+//    const { me } = cache.readQuery({ query: QUERY_ME });
+//    cache.writeQuery({
+//      query: QUERY_ME,
+//      data: { me: { ...me, books: [...me.books, saveBook] } },
+//    });
+//  },
+// });
 
 
 
@@ -90,14 +90,7 @@ const SearchBooks = () => {
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    console.log(bookToSave);
-
-
-
-
-
-
-
+    console.log(bookToSave.authors);
 
 
     // get token
@@ -108,16 +101,12 @@ const SearchBooks = () => {
     }
 
     try {
-      const { data }= await saveBook({
-        variables: {       
-          authors: bookToSave.authors,
-          description: bookToSave.description,
-          bookId: bookToSave.bookId,
-          image: bookToSave.image,
-          title: bookToSave.title,
-          link: bookToSave.link
+      const { data } = await saveBook({
+        variables: { bookInput:  bookToSave }
         },
-      });
+      );
+
+      console.log(data);
 
       // if (err) {
       //   throw new Error('something went wrong!');

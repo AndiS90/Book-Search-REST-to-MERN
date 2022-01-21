@@ -70,16 +70,17 @@ const resolvers = {
       // Return an `Auth` object that consists of the signed token and user's information
       return { token, user };
     },
-    saveBook: async (parent, { bookInput } , context) => {
+    saveBook: async (parent,  { bookInput } , context) => {
+      console.log(bookInput)
       if(context.user ){        
         // const book = await Book.create({ input });
      
   const updatedUser = await User.findOneAndUpdate(
         { _id: context.user._id },
-        { $addToSet: { savedBooks: { bookInput } } },
+        { $addToSet: { savedBooks:  bookInput  } },
         {
           new: true,
-          runValidation: true,
+          // runValidation: true,
         }
       );
 

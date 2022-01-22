@@ -6,35 +6,12 @@ import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import { useMutation } from '@apollo/client';
 import { SAVE_BOOK, } from "../utils/mutations";
-// import { QUERY_ME, QUERY_BOOKS } from '../utils/queries';
+
  
 const SearchBooks = () => {
 
 
   const [saveBook, { error }] = useMutation(SAVE_BOOK);  
-//     update(cache, { data: { saveBook } }) {
-//    try {
-//      const { books } = cache.readQuery({ query: QUERY_BOOKS });
-
-//      cache.writeQuery({
-//        query: QUERY_BOOKS,
-//        data: { books: [saveBook, ...books] },
-//      });
-//    } catch (error) {
-//      console.error(error);
-//    }
-
-//    // update me object's cache
-//    const { me } = cache.readQuery({ query: QUERY_ME });
-//    cache.writeQuery({
-//      query: QUERY_ME,
-//      data: { me: { ...me, books: [...me.books, saveBook] } },
-//    });
-//  },
-// });
-
-
-
 
 
   // create state for holding returned google api data
@@ -106,7 +83,7 @@ const SearchBooks = () => {
         },
       );
 
-      console.log(data);
+
 
       // if (err) {
       //   throw new Error('something went wrong!');
